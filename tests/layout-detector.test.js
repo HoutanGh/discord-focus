@@ -57,6 +57,41 @@ test("hides exact guild list when broad navigation contains protected content", 
   assert.equal(guildList.closest(".guilds_a").getAttribute(layout.ATTR_HIDDEN), "server-rail");
 });
 
+test("does not protect broad persistent layer wrappers", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <div class="layer_a">
+            <nav class="guilds_a"><ul data-list-id="guildsnav"></ul></nav>
+            <aside class="sidebar_a"><div class="sidebarList_a"></div></aside>
+            <main class="chat_a">
+              <header></header>
+              <section class="chatContent_a">
+                <ol data-list-id="chat-messages"></ol>
+                <form class="channelTextArea_a">
+                  <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+                </form>
+              </section>
+            </main>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const wrapper = dom.window.document.querySelector(".layer_a");
+
+  assert.equal(result.supported, true);
+  assert.equal(result.hiddenNodes.length, 3);
+  assert.equal(wrapper.hasAttribute(layout.ATTR_PROTECTED), false);
+  assert.ok(result.hiddenReasons.includes("serverRail"));
+  assert.ok(result.hiddenReasons.includes("channelSidebar"));
+  assert.ok(result.hiddenReasons.includes("header"));
+});
+
 test("hides safe page header outside the conversation root", () => {
   const dom = new JSDOM(`
     <!doctype html>
