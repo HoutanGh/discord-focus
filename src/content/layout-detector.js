@@ -186,9 +186,38 @@
     }));
   }
 
+  function hasDescendantWithClassPrefix(element, prefixes) {
+    return [...element.querySelectorAll("[class]")].some((descendant) => {
+      return hasAnyClassPrefix(descendant, prefixes);
+    });
+  }
+
+  function findRootTitleBars(roots) {
+    return uniqueElements(roots.flatMap((rootNode) => {
+      if (!rootNode) {
+        return [];
+      }
+
+      return [...rootNode.querySelectorAll("[class]")].filter((element) => {
+        return hasAnyClassPrefix(element, ["title_"])
+          && hasAnyClassPrefix(element, ["container_"])
+          && hasDescendantWithClassPrefix(element, ["children_", "toolbar_", "upperContainer_"]);
+      });
+    }));
+  }
+
   function findPageHeaders(documentRef) {
     const mount = documentRef.querySelector("#app-mount") || documentRef.body;
     return uniqueElements([...mount.querySelectorAll("header")]);
+  }
+
+  function findPersistentTopBars(documentRef, roots) {
+    return uniqueElements(findByClassPrefix(documentRef, ["bar_"]).filter((element) => {
+      const inConversationRoot = roots.some((rootNode) => rootNode && rootNode.contains(element));
+      return !inConversationRoot
+        && !closestTag(element, "nav")
+        && closestByClassPrefix(element, ["base_"]);
+    }));
   }
 
   function findMemberPanels(documentRef) {
@@ -241,7 +270,12 @@
       addHideCandidate(hidden, "channelSidebar", sidebar, protectedNodes, documentRef);
     });
 
-    uniqueElements([...findHeaders(roots), ...findPageHeaders(documentRef)]).forEach((header) => {
+    uniqueElements([
+      ...findHeaders(roots),
+      ...findRootTitleBars(roots),
+      ...findPageHeaders(documentRef),
+      ...findPersistentTopBars(documentRef, roots)
+    ]).forEach((header) => {
       addHideCandidate(hidden, "header", header, protectedNodes, documentRef);
     });
 
