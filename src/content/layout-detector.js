@@ -25,8 +25,6 @@
     '[role="dialog"]',
     '[aria-modal="true"]',
     '[data-list-id="quick-switcher-results"]',
-    '[class^="layer_"]',
-    '[class*=" layer_"]',
     '[class^="popout_"]',
     '[class*=" popout_"]',
     '[class^="menu_"]',
