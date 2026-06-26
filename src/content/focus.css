@@ -1,0 +1,9 @@
+html[data-discord-focus-active="true"] [data-discord-focus-hidden] {
+  display: none !important;
+}
+
+html[data-discord-focus-active="true"] [data-discord-focus-root="conversation"] {
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
+}

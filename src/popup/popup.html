@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Discord Focus</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <label class="toggle">
+        <input id="focus-toggle" type="checkbox">
+        <span>Focus mode</span>
+      </label>
+      <p id="status" aria-live="polite">Checking status...</p>
+    </main>
+    <script src="../shared/extension-api.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

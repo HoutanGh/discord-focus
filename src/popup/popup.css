@@ -1,0 +1,32 @@
+:root {
+  color-scheme: light dark;
+  font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-width: 220px;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.toggle {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  font-weight: 650;
+}
+
+input {
+  block-size: 18px;
+  inline-size: 18px;
+}
+
+p {
+  margin: 0;
+  color: color-mix(in srgb, CanvasText 70%, Canvas);
+}

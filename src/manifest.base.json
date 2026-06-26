@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Discord Focus",
+  "version": "0.1.0",
+  "description": "Keeps Discord Web focused on the active text conversation and composer.",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Discord Focus",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://discord.com/channels/*"],
+      "js": [
+        "shared/extension-api.js",
+        "shared/storage.js",
+        "content/layout-detector.js",
+        "content/content.js"
+      ],
+      "css": ["content/focus.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

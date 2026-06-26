@@ -23,10 +23,11 @@ build/
 .next/
 out/
 coverage/
+artifacts/
+web-ext-artifacts/
 
 # Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-
