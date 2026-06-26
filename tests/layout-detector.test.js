@@ -123,6 +123,49 @@ test("hides safe page header outside the conversation root", () => {
   assert.equal(header.getAttribute(layout.ATTR_HIDDEN), "header");
 });
 
+test("hides live Discord title and top bar class-prefix structures", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <div class="container__5e434">
+            <div class="base__5e434">
+              <div class="bar_c38106">
+                <div class="title_c38106"></div>
+              </div>
+              <nav class="guilds_a"><ul data-list-id="guildsnav"></ul></nav>
+              <aside class="sidebar_a"><div class="sidebarList_a"></div></aside>
+              <div class="chat_f75fb0">
+                <section class="title_f75fb0 container__9293f">
+                  <div class="upperContainer__9293f">
+                    <div class="children__9293f"></div>
+                    <div class="toolbar__9293f"></div>
+                  </div>
+                </section>
+                <div class="chatContent_a">
+                  <ol data-list-id="chat-messages"></ol>
+                  <form class="channelTextArea_a">
+                    <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const appBar = dom.window.document.querySelector(".bar_c38106");
+  const titleBar = dom.window.document.querySelector(".title_f75fb0");
+
+  assert.equal(result.supported, true);
+  assert.equal(appBar.getAttribute(layout.ATTR_HIDDEN), "header");
+  assert.equal(titleBar.getAttribute(layout.ATTR_HIDDEN), "header");
+});
+
 test("fails open on unsupported pages", () => {
   const dom = unsupportedFixture();
   const result = layout.applyFocus(dom.window.document);
