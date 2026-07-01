@@ -22,7 +22,7 @@ test("content controller applies focus and reports status", async () => {
 
   assert.equal(status.active, true);
   assert.equal(status.status, "active");
-  assert.equal(messageStatus.hiddenCount, 4);
+  assert.equal(messageStatus.hiddenCount, 5);
   controller.stop();
 });
 
@@ -39,7 +39,7 @@ test("content controller restores page when Focus mode is disabled", async () =>
   });
 
   await controller.start();
-  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}]`).length, 4);
+  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}]`).length, 5);
 
   await storage.writeFocusEnabled(false, api);
   await wait(5);

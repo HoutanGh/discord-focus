@@ -7,14 +7,17 @@ const { discordFixture, unsupportedFixture } = require("./helpers.js");
 test("detects and marks a supported Discord conversation layout", () => {
   const dom = discordFixture();
   const result = layout.applyFocus(dom.window.document);
+  const composer = dom.window.document.querySelector(".channelTextArea_a");
 
   assert.equal(result.supported, true);
   assert.equal(result.status, "active");
-  assert.equal(result.hiddenNodes.length, 4);
-  assert.equal(result.protectedNodes.length, 3);
+  assert.equal(result.hiddenNodes.length, 5);
+  assert.equal(result.protectedNodes.length, 2);
   assert.equal(dom.window.document.documentElement.getAttribute(layout.ATTR_ACTIVE), "true");
-  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}]`).length, 4);
+  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}]`).length, 5);
   assert.equal(dom.window.document.querySelector("[data-list-id='chat-messages']").getAttribute(layout.ATTR_PROTECTED), "true");
+  assert.equal(composer.getAttribute(layout.ATTR_HIDDEN), "composer");
+  assert.equal(composer.hasAttribute(layout.ATTR_PROTECTED), false);
 });
 
 test("reports partial cleanup when an allowlisted region is absent", () => {
@@ -85,11 +88,12 @@ test("does not protect broad persistent layer wrappers", () => {
   const wrapper = dom.window.document.querySelector(".layer_a");
 
   assert.equal(result.supported, true);
-  assert.equal(result.hiddenNodes.length, 3);
+  assert.equal(result.hiddenNodes.length, 4);
   assert.equal(wrapper.hasAttribute(layout.ATTR_PROTECTED), false);
   assert.ok(result.hiddenReasons.includes("serverRail"));
   assert.ok(result.hiddenReasons.includes("channelSidebar"));
   assert.ok(result.hiddenReasons.includes("header"));
+  assert.ok(result.hiddenReasons.includes("composer"));
 });
 
 test("hides safe page header outside the conversation root", () => {
@@ -164,6 +168,36 @@ test("hides live Discord title and top bar class-prefix structures", () => {
   assert.equal(result.supported, true);
   assert.equal(appBar.getAttribute(layout.ATTR_HIDDEN), "header");
   assert.equal(titleBar.getAttribute(layout.ATTR_HIDDEN), "header");
+});
+
+test("uses the composer as a chat anchor while hiding it", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <main class="chat_a">
+            <header></header>
+            <section class="chatContent_a">
+              <ol data-list-id="chat-messages"></ol>
+              <form class="channelTextArea_a">
+                <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+              </form>
+            </section>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const composer = dom.window.document.querySelector(".channelTextArea_a");
+  const messageList = dom.window.document.querySelector('[data-list-id="chat-messages"]');
+
+  assert.equal(result.supported, true);
+  assert.equal(composer.getAttribute(layout.ATTR_HIDDEN), "composer");
+  assert.equal(composer.hasAttribute(layout.ATTR_PROTECTED), false);
+  assert.equal(messageList.getAttribute(layout.ATTR_PROTECTED), "true");
 });
 
 test("fails open on unsupported pages", () => {
