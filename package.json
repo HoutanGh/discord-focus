@@ -2,7 +2,7 @@
   "name": "discord-focus",
   "version": "0.1.0",
   "private": true,
-  "description": "Firefox-first local WebExtension that hides persistent Discord chrome for a focused text conversation view.",
+  "description": "Firefox-first local WebExtension that hides Discord chrome and the message box for a focused reading view.",
   "engines": {
     "node": ">=22"
   },

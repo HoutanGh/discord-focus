@@ -242,7 +242,7 @@
     const messageLists = findMessageLists(documentRef);
     const composers = findComposers(documentRef);
     const transientNodes = findTransientProtectedNodes(documentRef);
-    const protectedNodes = uniqueElements([...messageLists, ...composers, ...transientNodes]);
+    const protectedNodes = uniqueElements([...messageLists, ...transientNodes]);
 
     if (messageLists.length === 0 || composers.length === 0) {
       return {
@@ -281,6 +281,10 @@
 
     findMemberPanels(documentRef).forEach((panel) => {
       addHideCandidate(hidden, "memberPanel", panel, protectedNodes, documentRef);
+    });
+
+    composers.forEach((composer) => {
+      addHideCandidate(hidden, "composer", composer, protectedNodes, documentRef);
     });
 
     const hiddenNodes = [...hidden.keys()];
