@@ -13,7 +13,6 @@ Help me ship Discord Focus as a small, correct, Firefox-first WebExtension with 
 ## Visible and hidden UI
 While Focus mode is enabled, preserve only:
 - current message or opened-thread content;
-- composer and reply/edit/upload UI;
 - temporary native menus, dialogs, popouts, and Quick Switcher.
 
 Hide all persistent Discord chrome, including:
@@ -22,8 +21,9 @@ Hide all persistent Discord chrome, including:
 - account, mute, deafen, and voice controls inside that sidebar;
 - channel header and persistent top toolbar;
 - member/activity sidebars.
+- message composer and reply/edit/upload UI.
 
-Voice, account, settings, and server-management controls may require turning Focus mode off. This is intentional.
+Sending messages, uploads, voice, account, settings, and server-management controls may require turning Focus mode off. This is intentional.
 
 ## Non-negotiables
 - Run only on `https://discord.com/channels/*`.
@@ -32,7 +32,7 @@ Voice, account, settings, and server-management controls may require turning Foc
 - Keep the extension local-only: no telemetry, remote code, CDN assets, external services, or extension-originated network requests.
 - Declare only permissions required by the product spec.
 - Fail open on unsupported or uncertain layouts.
-- Never hide an ancestor/descendant of the protected conversation, composer, modal layer, Quick Switcher, thread content, or popout layer.
+- Never hide an ancestor/descendant of the protected conversation, modal layer, Quick Switcher, thread content, or popout layer.
 - Turning Focus mode off must restore normal Discord without reload.
 - Do not refactor unrelated code or add unrequested features.
 
@@ -96,10 +96,11 @@ Automate:
 - WSL build/export behaviour.
 
 Manually verify in Windows Firefox first, then Chrome:
-- only messages/thread content and composer remain;
+- only messages/thread content remains;
 - all persistent Discord chrome is hidden;
 - `Ctrl+K` and destination changes work;
-- composing, sending, replies, edits, uploads, reactions, menus, dialogs, and threads work;
+- reading, scrolling, reactions, menus, dialogs, and threads work;
+- Focus-off restores composing, sending, replies, edits, and uploads;
 - Focus-off restores full Discord immediately;
 - unsupported pages fail open.
 

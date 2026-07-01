@@ -10,7 +10,6 @@ Build a local-only browser extension that reduces Discord Web to the active text
 2. Focus mode starts enabled.
 3. The page shows only:
    - the current message or thread content;
-   - the message composer and its reply/edit/upload UI;
    - temporary native menus, dialogs, popouts, and Discord's Quick Switcher when invoked.
 4. Hide all persistent Discord chrome, including:
    - server rail;
@@ -18,27 +17,28 @@ Build a local-only browser extension that reduces Discord Web to the active text
    - account, mute, deafen, and voice controls contained in that sidebar;
    - channel header and persistent top toolbar;
    - member/activity sidebars.
+   - message composer and its reply/edit/upload UI.
 5. Use Discord's native `Ctrl+K` to switch destination.
 6. The extension popup contains only a Focus mode toggle and status.
 7. Turning Focus mode off restores normal Discord without reloading.
 
-Focus mode is intended for text conversations. Voice, account, server-management, and settings controls may require turning Focus mode off.
+Focus mode is intended for reading text conversations. Sending messages, uploads, voice, account, server-management, and settings controls may require turning Focus mode off.
 
 Do not build custom navigation, injected controls, pinned channels, a replacement header, keyboard shortcuts, or a resource-saver feature.
 
 ## Supported views
 
-Support normal server text channels, announcement channels, DMs, group DMs, and an opened text thread when their normal message list/composer is present.
+Support normal server text channels, announcement channels, DMs, group DMs, and an opened text thread when their normal message list and composer anchors are present.
 
 Fail open on Friends/Home, forum index pages, voice/stage/call layouts, settings, login, and unknown Discord layouts.
 
 ## Layout rules
 
-- First identify a protected conversation surface using a message-list or composer anchor.
+- First identify a conversation surface using message-list and composer anchors.
 - Then identify each hideable region independently from an explicit selector allowlist.
 - Mark exact regions with extension-owned `data-*` attributes and hide them through static extension CSS.
 - Never remove, reparent, replace, or set inline styles on Discord nodes.
-- Never hide an ancestor or descendant of the protected message list, composer, modal layer, Quick Switcher, opened thread content, or native popout layer.
+- Never hide an ancestor or descendant of the protected message list, modal layer, Quick Switcher, opened thread content, or native popout layer.
 - Never classify a region from screen position, width, or "right-side" geometry alone.
 - Generated Discord class-prefix selectors may be isolated fallbacks, not broad global CSS selectors.
 - Missing selectors produce partial cleanup or no cleanup; they must never blank the conversation.
@@ -155,7 +155,7 @@ package-lock.json
 
 - Firefox and Chrome manifests build correctly.
 - `web-ext lint` reports no Firefox errors.
-- Tests cover storage, manifest generation, detector success, partial success, failure, protected-node rejection, SPA rerenders, and restoration.
+- Tests cover storage, manifest generation, detector success, composer hiding, partial success, failure, protected-node rejection, SPA rerenders, and restoration.
 - Focus-off removes extension state immediately.
 - Production code contains no network, Discord-storage, cookie, WebSocket, or page-runtime injection path.
 - The layout probe is excluded from both production builds.
@@ -165,10 +165,11 @@ package-lock.json
 
 In current Firefox first, then Chrome:
 
-- a normal text channel or DM shows only message/thread content and the composer;
+- a normal text channel or DM shows only message/thread content;
 - server rail, channel sidebar, account/voice controls, header, and member list are hidden;
 - `Ctrl+K` opens unchanged and switching destinations keeps Focus mode active;
-- reading, scrolling, composing, sending, replying, editing, uploading, reactions, context menus, dialogs, and an opened thread still work;
+- reading, scrolling, reactions, context menus, dialogs, and an opened thread still work;
+- turning Focus mode off restores composing, sending, replying, editing, and uploading;
 - turning Focus mode off restores the full Discord UI without reload;
 - unsupported views remain unchanged rather than broken.
 

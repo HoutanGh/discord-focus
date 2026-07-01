@@ -1,6 +1,6 @@
 # Discord Focus
 
-Discord Focus is a local-only, Firefox-first WebExtension for Discord Web. Focus mode starts enabled on `https://discord.com/channels/*` and hides persistent Discord chrome while preserving the current text conversation, composer, temporary menus, dialogs, popouts, opened thread content, and Discord's native `Ctrl+K`.
+Discord Focus is a local-only, Firefox-first WebExtension for Discord Web. Focus mode starts enabled on `https://discord.com/channels/*` and hides persistent Discord chrome plus the message box while preserving the current text conversation, temporary menus, dialogs, popouts, opened thread content, and Discord's native `Ctrl+K`.
 
 The extension does not use Discord APIs, call external services, add telemetry, inject into Discord's runtime, remove Discord nodes, or store Discord content. Unsupported or uncertain layouts fail open.
 
@@ -104,10 +104,11 @@ Mozilla signing credentials are not automated or stored in this repository.
 
 Run these in Windows Firefox first, then Chrome:
 
-- A normal text channel or DM shows only message or thread content and the composer.
-- Server rail, channel sidebar, account controls, mute/deafen controls, voice controls, header, toolbar, and member/activity sidebars are hidden.
+- A normal text channel or DM shows only message or thread content.
+- Server rail, channel sidebar, account controls, mute/deafen controls, voice controls, header, toolbar, message box, and member/activity sidebars are hidden.
 - `Ctrl+K` opens Discord's native Quick Switcher and destination changes keep Focus mode active.
-- Reading, scrolling, composing, sending, replying, editing, uploading, reactions, context menus, dialogs, and opened threads still work.
+- Reading, scrolling, reactions, context menus, dialogs, and opened threads still work.
+- Turning Focus mode off restores composing, sending, replying, editing, and uploading.
 - Turning Focus mode off in the popup restores the full Discord UI without reload.
 - Friends/Home, forum index pages, voice/stage/call layouts, settings, login, and unknown layouts remain unchanged.
 
