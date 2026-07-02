@@ -3,10 +3,7 @@ html[data-discord-focus-active="true"] [data-discord-focus-hidden] {
 }
 
 html[data-discord-focus-active="true"] [data-discord-focus-root="conversation"] {
-  align-self: stretch !important;
-  flex: 0 1 960px !important;
-  inline-size: min(100%, 960px) !important;
-  margin-inline: auto !important;
   min-width: 0 !important;
-  max-width: 960px !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
 }
