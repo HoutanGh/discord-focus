@@ -2,6 +2,15 @@ html[data-discord-focus-active="true"] [data-discord-focus-hidden] {
   display: none !important;
 }
 
+html[data-discord-focus-active="true"] [data-discord-focus-layout="title-bar-grid"] {
+  --custom-app-top-bar-height: 0px !important;
+  grid-template-rows:
+    [top] 0
+    [titleBarEnd] auto
+    [noticeEnd] minmax(0, 1fr)
+    [end] !important;
+}
+
 html[data-discord-focus-active="true"] [data-discord-focus-root="conversation"] {
   min-width: 0 !important;
   max-width: none !important;

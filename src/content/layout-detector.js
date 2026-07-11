@@ -5,6 +5,7 @@
 
   const ATTR_ACTIVE = "data-discord-focus-active";
   const ATTR_HIDDEN = "data-discord-focus-hidden";
+  const ATTR_LAYOUT = "data-discord-focus-layout";
   const ATTR_PROTECTED = "data-discord-focus-protected";
   const ATTR_ROOT = "data-discord-focus-root";
 
@@ -220,6 +221,24 @@
     }));
   }
 
+  function findTitleBarGridContainers(roots, topBars) {
+    return uniqueElements(topBars.map((topBar) => {
+      const gridContainer = closestByClassPrefix(topBar, ["base_"]);
+      if (!gridContainer) {
+        return null;
+      }
+
+      const ownsConversation = roots.some((rootNode) => {
+        return rootNode && gridContainer.contains(rootNode);
+      });
+      const outsideConversation = roots.every((rootNode) => {
+        return !rootNode || !rootNode.contains(topBar);
+      });
+
+      return ownsConversation && outsideConversation ? gridContainer : null;
+    }));
+  }
+
   function findMemberPanels(documentRef) {
     return uniqueElements(findByClassPrefix(documentRef, [
       "membersWrap_",
@@ -249,6 +268,7 @@
         supported: false,
         status: "unsupported",
         rootNodes: [],
+        layoutNodes: [],
         protectedNodes,
         hiddenNodes: [],
         hiddenReasons: []
@@ -257,6 +277,8 @@
 
     const hidden = new Map();
     const roots = findConversationRoots(messageLists, composers);
+    const topBars = findPersistentTopBars(documentRef, roots);
+    const layoutNodes = findTitleBarGridContainers(roots, topBars);
 
     addHideCandidate(
       hidden,
@@ -274,7 +296,7 @@
       ...findHeaders(roots),
       ...findRootTitleBars(roots),
       ...findPageHeaders(documentRef),
-      ...findPersistentTopBars(documentRef, roots)
+      ...topBars
     ]).forEach((header) => {
       addHideCandidate(hidden, "header", header, protectedNodes, documentRef);
     });
@@ -301,6 +323,7 @@
       supported: true,
       status,
       rootNodes: roots,
+      layoutNodes,
       protectedNodes,
       hiddenNodes,
       hiddenReasons
@@ -309,8 +332,9 @@
 
   function clearFocusMarkers(documentRef) {
     documentRef.documentElement.removeAttribute(ATTR_ACTIVE);
-    documentRef.querySelectorAll(`[${ATTR_HIDDEN}], [${ATTR_PROTECTED}], [${ATTR_ROOT}]`).forEach((node) => {
+    documentRef.querySelectorAll(`[${ATTR_HIDDEN}], [${ATTR_LAYOUT}], [${ATTR_PROTECTED}], [${ATTR_ROOT}]`).forEach((node) => {
       node.removeAttribute(ATTR_HIDDEN);
+      node.removeAttribute(ATTR_LAYOUT);
       node.removeAttribute(ATTR_PROTECTED);
       node.removeAttribute(ATTR_ROOT);
     });
@@ -332,6 +356,10 @@
       node.setAttribute(ATTR_ROOT, "conversation");
     });
 
+    result.layoutNodes.forEach((node) => {
+      node.setAttribute(ATTR_LAYOUT, "title-bar-grid");
+    });
+
     result.hiddenNodes.forEach((node, index) => {
       node.setAttribute(ATTR_HIDDEN, markerValue(result.hiddenReasons[index]));
     });
@@ -343,6 +371,7 @@
   const exported = {
     ATTR_ACTIVE,
     ATTR_HIDDEN,
+    ATTR_LAYOUT,
     ATTR_PROTECTED,
     ATTR_ROOT,
     applyFocus,
