@@ -163,11 +163,41 @@ test("hides live Discord title and top bar class-prefix structures", () => {
 
   const result = layout.applyFocus(dom.window.document);
   const appBar = dom.window.document.querySelector(".bar_c38106");
+  const appGrid = dom.window.document.querySelector(".base__5e434");
   const titleBar = dom.window.document.querySelector(".title_f75fb0");
 
   assert.equal(result.supported, true);
   assert.equal(appBar.getAttribute(layout.ATTR_HIDDEN), "header");
+  assert.deepEqual(result.layoutNodes, [appGrid]);
+  assert.equal(appGrid.getAttribute(layout.ATTR_LAYOUT), "title-bar-grid");
   assert.equal(titleBar.getAttribute(layout.ATTR_HIDDEN), "header");
+});
+
+test("does not alter a title-bar grid that does not own the conversation", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <div class="base_shell"><div class="bar_shell"></div></div>
+          <main class="chat_a">
+            <header></header>
+            <ol data-list-id="chat-messages"></ol>
+            <form class="channelTextArea_a">
+              <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+            </form>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const unrelatedGrid = dom.window.document.querySelector(".base_shell");
+
+  assert.equal(result.supported, true);
+  assert.deepEqual(result.layoutNodes, []);
+  assert.equal(unrelatedGrid.hasAttribute(layout.ATTR_LAYOUT), false);
 });
 
 test("uses the composer as a chat anchor while hiding it", () => {
@@ -229,5 +259,5 @@ test("clears all extension-owned markers for restoration", () => {
   layout.clearFocusMarkers(dom.window.document);
 
   assert.equal(dom.window.document.documentElement.hasAttribute(layout.ATTR_ACTIVE), false);
-  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}], [${layout.ATTR_PROTECTED}], [${layout.ATTR_ROOT}]`).length, 0);
+  assert.equal(dom.window.document.querySelectorAll(`[${layout.ATTR_HIDDEN}], [${layout.ATTR_LAYOUT}], [${layout.ATTR_PROTECTED}], [${layout.ATTR_ROOT}]`).length, 0);
 });
