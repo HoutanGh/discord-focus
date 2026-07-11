@@ -57,6 +57,10 @@
     return prefixes.some((prefix) => hasClassPrefix(element, prefix));
   }
 
+  function hasAllClassPrefixes(element, prefixes) {
+    return prefixes.every((prefix) => hasClassPrefix(element, prefix));
+  }
+
   function findByClassPrefix(documentRef, prefixes) {
     return [...documentRef.querySelectorAll("[class]")].filter((element) => {
       return hasAnyClassPrefix(element, prefixes);
@@ -207,6 +211,18 @@
     }));
   }
 
+  function findNewMessageBars(roots) {
+    return uniqueElements(roots.flatMap((rootNode) => {
+      if (!rootNode) {
+        return [];
+      }
+
+      return [...rootNode.querySelectorAll("[class]")].filter((element) => {
+        return hasAllClassPrefixes(element, ["newMessagesBar_", "barBase_"]);
+      });
+    }));
+  }
+
   function findPageHeaders(documentRef) {
     const mount = documentRef.querySelector("#app-mount") || documentRef.body;
     return uniqueElements([...mount.querySelectorAll("header")]);
@@ -303,6 +319,10 @@
 
     findMemberPanels(documentRef).forEach((panel) => {
       addHideCandidate(hidden, "memberPanel", panel, protectedNodes, documentRef);
+    });
+
+    findNewMessageBars(roots).forEach((bar) => {
+      addHideCandidate(hidden, "newMessagesBar", bar, protectedNodes, documentRef);
     });
 
     composers.forEach((composer) => {
