@@ -200,6 +200,66 @@ test("does not alter a title-bar grid that does not own the conversation", () =>
   assert.equal(unrelatedGrid.hasAttribute(layout.ATTR_LAYOUT), false);
 });
 
+test("hides the exact new-message bar inside a supported conversation", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <div class="newMessagesBar_decoy"></div>
+          <main class="chat_a">
+            <header></header>
+            <div class="messagesWrapper_a">
+              <div class="newMessagesBar_a barBase_a"><button></button></div>
+              <ol data-list-id="chat-messages"></ol>
+            </div>
+            <form class="channelTextArea_a">
+              <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+            </form>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const bar = dom.window.document.querySelector(".barBase_a");
+  const decoy = dom.window.document.querySelector(".newMessagesBar_decoy");
+
+  assert.equal(result.supported, true);
+  assert.ok(result.hiddenReasons.includes("newMessagesBar"));
+  assert.equal(bar.getAttribute(layout.ATTR_HIDDEN), "new-messages-bar");
+  assert.equal(decoy.hasAttribute(layout.ATTR_HIDDEN), false);
+});
+
+test("does not hide a new-message lookalike containing the protected timeline", () => {
+  const dom = new JSDOM(`
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app-mount">
+          <main class="chat_a">
+            <header></header>
+            <div class="newMessagesBar_a barBase_a">
+              <ol data-list-id="chat-messages"></ol>
+            </div>
+            <form class="channelTextArea_a">
+              <div role="textbox" contenteditable="true" data-slate-editor="true"></div>
+            </form>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const result = layout.applyFocus(dom.window.document);
+  const lookalike = dom.window.document.querySelector(".newMessagesBar_a");
+
+  assert.equal(result.supported, true);
+  assert.equal(result.hiddenReasons.includes("newMessagesBar"), false);
+  assert.equal(lookalike.hasAttribute(layout.ATTR_HIDDEN), false);
+});
+
 test("uses the composer as a chat anchor while hiding it", () => {
   const dom = new JSDOM(`
     <!doctype html>

@@ -70,3 +70,25 @@ test("content controller rescans after SPA child-list changes", async () => {
   assert.equal(memberPanel.getAttribute(layout.ATTR_HIDDEN), "member-panel");
   controller.stop();
 });
+
+test("content controller hides a new-message bar inserted after startup", async () => {
+  const dom = discordFixture();
+  const api = createMemoryApi();
+  const controller = content.createFocusController({
+    document: dom.window.document,
+    window: dom.window,
+    api,
+    storage,
+    detector: layout,
+    debounceMs: 1
+  });
+
+  await controller.start();
+  const newMessageBar = dom.window.document.createElement("div");
+  newMessageBar.className = "newMessagesBar_b barBase_b";
+  dom.window.document.querySelector(".chatContent_a").prepend(newMessageBar);
+  await wait(10);
+
+  assert.equal(newMessageBar.getAttribute(layout.ATTR_HIDDEN), "new-messages-bar");
+  controller.stop();
+});
