@@ -8,10 +8,10 @@ Build a local-only browser extension that reduces Discord Web to the active text
 
 1. Open `https://discord.com/channels/*`.
 2. Focus mode starts enabled.
-3. The page shows only:
+3. By default, the page shows only:
    - the current message or thread content;
    - temporary native menus, dialogs, popouts, and Discord's Quick Switcher when invoked.
-4. Hide all persistent Discord chrome, including:
+4. By default, hide all persistent Discord chrome, including:
    - server rail;
    - channel/DM sidebar;
    - account, mute, deafen, and voice controls contained in that sidebar;
@@ -19,10 +19,13 @@ Build a local-only browser extension that reduces Discord Web to the active text
    - member/activity sidebars.
    - message composer and its reply/edit/upload UI.
 5. Use Discord's native `Ctrl+K` to switch destination.
-6. The extension popup contains only a Focus mode toggle and status.
-7. Turning Focus mode off restores normal Discord without reloading.
+6. The extension popup contains a Focus mode toggle, `Hide navigation`, `Hide message box`, and status.
+7. `Hide navigation` starts checked and independently controls the server rail and left channel/DM sidebar, including the account and voice controls contained there.
+8. `Hide message box` starts checked and independently controls the composer and its reply/edit/upload UI.
+9. The right member/activity panel, headers, and other persistent cleanup remain hidden whenever Focus mode is enabled.
+10. Turning Focus mode off restores normal Discord without reloading, regardless of the two independent settings.
 
-Focus mode is intended for reading text conversations. Sending messages, uploads, voice, account, server-management, and settings controls may require turning Focus mode off.
+Focus mode defaults to reading text conversations. Users may selectively restore navigation or the message box without disabling the remaining Focus cleanup.
 
 Do not build custom navigation, injected controls, pinned channels, a replacement header, keyboard shortcuts, or a resource-saver feature.
 
@@ -75,7 +78,8 @@ A development-only `tools/layout-probe.js` may output tag names, roles, allowlis
 - Vanilla JavaScript, CSS, and HTML; no framework or runtime dependency.
 - Static content script and popup; no background script or service worker.
 - Promise-based `browser.*` API behind a tiny local adapter with a Chrome fallback.
-- Settings schema: `{ version: 1, focusEnabled: true }`.
+- Settings schema: `{ version: 2, focusEnabled: true, hideNavigation: true, hideMessageBox: true }`.
+- Version 1 settings migrate with both new hide options enabled, preserving existing behaviour.
 - Popup writes `storage.local`; content scripts react to `storage.onChanged`.
 - Popup obtains page status by messaging the active tab without reading its URL and without requesting the `tabs` permission.
 
@@ -155,7 +159,7 @@ package-lock.json
 
 - Firefox and Chrome manifests build correctly.
 - `web-ext lint` reports no Firefox errors.
-- Tests cover storage, manifest generation, detector success, composer hiding, partial success, failure, protected-node rejection, SPA rerenders, and restoration.
+- Tests cover storage migration, popup state, independent navigation/message-box settings, manifest generation, detector success, composer hiding, partial success, failure, protected-node rejection, SPA rerenders, and restoration.
 - Focus-off removes extension state immediately.
 - Production code contains no network, Discord-storage, cookie, WebSocket, or page-runtime injection path.
 - The layout probe is excluded from both production builds.
@@ -171,6 +175,9 @@ In current Firefox first, then Chrome:
 - reading, scrolling, reactions, context menus, dialogs, and an opened thread still work;
 - turning Focus mode off restores composing, sending, replying, editing, and uploading;
 - turning Focus mode off restores the full Discord UI without reload;
+- unchecking `Hide navigation` restores the server rail and left sidebar without restoring the message box;
+- unchecking `Hide message box` restores composing without restoring navigation;
+- all four navigation/message-box combinations survive destination changes and SPA rerenders;
 - unsupported views remain unchanged rather than broken.
 
 Manual live-Discord checks and Mozilla signing are the only expected post-generation steps. Codex must report them as pending if it cannot perform them.

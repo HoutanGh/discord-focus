@@ -2,6 +2,8 @@
 
 Discord Focus is a local-only, Firefox-first WebExtension for Discord Web. Focus mode starts enabled on `https://discord.com/channels/*` and hides persistent Discord chrome plus the message box while preserving the current text conversation, temporary menus, dialogs, popouts, opened thread content, and Discord's native `Ctrl+K`.
 
+The popup starts with `Hide navigation` and `Hide message box` checked. Either can be unchecked independently: navigation restores the server rail and left channel/DM sidebar, while the message-box option restores composing, replies, edits, and uploads. Turning Focus mode off restores full Discord.
+
 The extension does not use Discord APIs, call external services, add telemetry, inject into Discord's runtime, remove Discord nodes, or store Discord content. Unsupported or uncertain layouts fail open.
 
 ## Requirements
@@ -110,6 +112,9 @@ Run these in Windows Firefox first, then Chrome:
 - Reading, scrolling, reactions, context menus, dialogs, and opened threads still work.
 - Turning Focus mode off restores composing, sending, replying, editing, and uploading.
 - Turning Focus mode off in the popup restores the full Discord UI without reload.
+- Unchecking **Hide navigation** restores the server rail and left channel/DM sidebar while the message box remains hidden.
+- Unchecking **Hide message box** restores composing while navigation remains hidden.
+- Each combination remains selected after switching channels or opening a thread.
 - Friends/Home, forum index pages, voice/stage/call layouts, settings, login, and unknown layouts remain unchanged.
 
 Automated tests use local fixtures only. They are not proof that the current authenticated Discord DOM has been manually verified.

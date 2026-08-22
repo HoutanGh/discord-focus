@@ -11,7 +11,7 @@ Help me ship Discord Focus as a small, correct, Firefox-first WebExtension with 
 - Do not expand scope without explicit approval.
 
 ## Visible and hidden UI
-While Focus mode is enabled, preserve only:
+By default, while Focus mode is enabled, preserve only:
 - current message or opened-thread content;
 - temporary native menus, dialogs, popouts, and Quick Switcher.
 
@@ -24,6 +24,12 @@ Hide all persistent Discord chrome, including:
 - message composer and reply/edit/upload UI.
 
 Sending messages, uploads, voice, account, settings, and server-management controls may require turning Focus mode off. This is intentional.
+
+The popup also provides two checked-by-default options:
+- `Hide navigation` controls the server rail and left channel/DM sidebar as one group;
+- `Hide message box` controls the composer and its reply/edit/upload UI.
+
+Unchecking an option preserves that region while the remaining Focus cleanup stays active. Focus mode off always restores full Discord. The right member/activity panel is not part of the navigation option.
 
 ## Non-negotiables
 - Run only on `https://discord.com/channels/*`.
