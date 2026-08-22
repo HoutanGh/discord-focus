@@ -19,11 +19,15 @@ Build a local-only browser extension that reduces Discord Web to the active text
    - member/activity sidebars.
    - message composer and its reply/edit/upload UI.
 5. Use Discord's native `Ctrl+K` to switch destination.
-6. The extension popup contains a Focus mode toggle, `Hide navigation`, `Hide message box`, and status.
-7. `Hide navigation` starts checked and independently controls the server rail and left channel/DM sidebar, including the account and voice controls contained there.
-8. `Hide message box` starts checked and independently controls the composer and its reply/edit/upload UI.
-9. The right member/activity panel, headers, and other persistent cleanup remain hidden whenever Focus mode is enabled.
-10. Turning Focus mode off restores normal Discord without reloading, regardless of the two independent settings.
+6. The extension popup contains a global Focus mode toggle, `This channel` and `Defaults` scopes, `Hide navigation`, `Hide message box`, and status.
+7. `Defaults` starts with both hide options checked and applies to every channel without a saved override.
+8. `This channel` is available on exact numeric server-channel routes and shows the effective settings for the current channel. Changing either option saves both option values as that channel's override.
+9. `Use defaults` removes the current channel's override. `Clear all channel settings` removes every saved override.
+10. DMs, group DMs, private-browsing sessions, and unsupported or uncertain route shapes use defaults without saving per-channel settings.
+11. `Hide navigation` independently controls the server rail and left channel/DM sidebar, including the account and voice controls contained there.
+12. `Hide message box` independently controls the composer and its reply/edit/upload UI.
+13. The right member/activity panel, headers, and other persistent cleanup remain hidden whenever Focus mode is enabled.
+14. Turning Focus mode off restores normal Discord without reloading, regardless of the two independent settings.
 
 Focus mode defaults to reading text conversations. Users may selectively restore navigation or the message box without disabling the remaining Focus cleanup.
 
@@ -32,6 +36,8 @@ Do not build custom navigation, injected controls, pinned channels, a replacemen
 ## Supported views
 
 Support normal server text channels, announcement channels, DMs, group DMs, and an opened text thread when their normal message list and composer anchors are present.
+
+Remember per-channel overrides only for exact `/channels/<numeric-server>/<numeric-channel>` route shapes. Other supported conversations continue to use defaults.
 
 Fail open on Friends/Home, forum index pages, voice/stage/call layouts, settings, login, and unknown Discord layouts.
 
@@ -67,7 +73,7 @@ The extension must:
 - never read, log, store, or transmit message text, names, channel/server titles, account identifiers, tokens, cookies, Discord storage, or WebSocket data;
 - use only the minimum route information required for local per-channel preferences: the content script may inspect the current `location.pathname` in memory and use only its channel segment to select an override;
 - never log, persist, sync, expose to page content, or transmit a raw channel ID or URL; derive an opaque installation-specific key before persistence, then discard the raw pathname and channel ID;
-- store only the opaque channel key and the approved preference booleans in `storage.local`, and do not save per-channel preferences from private-browsing sessions;
+- limit `storage.local` to the settings schema version, global/default booleans, a random local keying salt, opaque channel keys, and approved override booleans, and do not save per-channel preferences from private-browsing sessions;
 - never call Discord APIs, automate account actions, or inject code into Discord's JavaScript runtime;
 - include no analytics, telemetry, remote code, CDN assets, external services, or extension-originated network requests;
 - request only the `storage` permission and the narrowly scoped static content-script match.
@@ -81,10 +87,11 @@ A development-only `tools/layout-probe.js` may output tag names, roles, allowlis
 - Vanilla JavaScript, CSS, and HTML; no framework or runtime dependency.
 - Static content script and popup; no background script or service worker.
 - Promise-based `browser.*` API behind a tiny local adapter with a Chrome fallback.
-- Settings schema: `{ version: 2, focusEnabled: true, hideNavigation: true, hideMessageBox: true }`.
-- Version 1 settings migrate with both new hide options enabled, preserving existing behaviour.
-- Popup writes `storage.local`; content scripts react to `storage.onChanged`.
-- Popup obtains page status by messaging the active tab without reading its URL and without requesting the `tabs` permission.
+- Settings schema: `{ version: 3, focusEnabled: true, defaults: { hideNavigation: true, hideMessageBox: true }, channelOverrides: {} }`.
+- A separate random local salt derives installation-specific opaque keys. Raw channel IDs and paths never enter settings or popup messages.
+- Version 1 and version 2 settings migrate into version 3 defaults, preserving existing behaviour.
+- Popup writes global/default settings to `storage.local`; the content script writes and removes current-channel overrides after deriving the key locally. Content scripts react to `storage.onChanged`.
+- Popup obtains page status and requests current-channel changes by messaging the active tab without reading its URL, receiving an identifier, or requesting the `tabs` permission.
 
 Firefox manifest:
 
@@ -134,6 +141,7 @@ dist/chrome/
 
 ```text
 src/
+  content/channel-context.js
   content/content.js
   content/focus.css
   content/layout-detector.js
@@ -162,7 +170,7 @@ package-lock.json
 
 - Firefox and Chrome manifests build correctly.
 - `web-ext lint` reports no Firefox errors.
-- Tests cover storage migration, popup state, independent navigation/message-box settings, manifest generation, detector success, composer hiding, partial success, failure, protected-node rejection, SPA rerenders, and restoration.
+- Tests cover storage migration, opaque key derivation, raw-identifier rejection, defaults, per-channel overrides, override removal, popup scope state, private-browsing fallback, manifest generation, detector success, composer hiding, partial success, failure, protected-node rejection, SPA channel changes, rerenders, and restoration.
 - Focus-off removes extension state immediately.
 - Production code contains no network, Discord-storage, cookie, WebSocket, or page-runtime injection path.
 - The layout probe is excluded from both production builds.
@@ -180,7 +188,11 @@ In current Firefox first, then Chrome:
 - turning Focus mode off restores the full Discord UI without reload;
 - unchecking `Hide navigation` restores the server rail and left sidebar without restoring the message box;
 - unchecking `Hide message box` restores composing without restoring navigation;
-- all four navigation/message-box combinations survive destination changes and SPA rerenders;
+- changing either option in `This channel` creates a saved override without changing `Defaults`;
+- returning to an overridden server channel restores its two saved options;
+- an unconfigured server channel and a DM use `Defaults`;
+- `Use defaults` removes the current override and `Clear all channel settings` removes every override;
+- all four navigation/message-box combinations survive SPA rerenders;
 - unsupported views remain unchanged rather than broken.
 
 Manual live-Discord checks and Mozilla signing are the only expected post-generation steps. Codex must report them as pending if it cannot perform them.

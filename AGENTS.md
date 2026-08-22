@@ -29,7 +29,7 @@ The popup also provides two checked-by-default options:
 - `Hide navigation` controls the server rail and left channel/DM sidebar as one group;
 - `Hide message box` controls the composer and its reply/edit/upload UI.
 
-Unchecking an option preserves that region while the remaining Focus cleanup stays active. Focus mode off always restores full Discord. The right member/activity panel is not part of the navigation option.
+Focus mode is a global master switch. The two hide options have `This channel` and `Defaults` scopes. Normal server channels may store a complete two-option override; channels without an override, DMs, and uncertain route shapes use the defaults. `Use defaults` removes the current override, and `Clear all channel settings` removes every override. Unchecking an option preserves that region while the remaining Focus cleanup stays active. Focus mode off always restores full Discord. The right member/activity panel is not part of the navigation option.
 
 ## Non-negotiables
 - Run only on `https://discord.com/channels/*`.
@@ -37,7 +37,7 @@ Unchecking an option preserves that region while the remaining Focus cleanup sta
 - Never read, log, store, or transmit messages, names, channel/server titles, or account identifiers.
 - Use only the minimum route information required for local per-channel preferences: the content script may inspect the current `location.pathname` in memory and use only its channel segment to select an override.
 - Never log, persist, sync, expose to page content, or transmit a raw channel ID or URL. Before persistence, derive an opaque installation-specific key and discard the raw pathname and channel ID.
-- Store only the opaque channel key and the approved preference booleans in `storage.local`. Do not save per-channel preferences from private-browsing sessions.
+- Limit `storage.local` to the settings schema version, global/default booleans, a random local keying salt, opaque channel keys, and approved override booleans. Do not save per-channel preferences from private-browsing sessions.
 - Keep the extension local-only: no telemetry, remote code, CDN assets, external services, or extension-originated network requests.
 - Declare only permissions required by the product spec.
 - Fail open on unsupported or uncertain layouts.
@@ -96,6 +96,8 @@ Do not introduce a backend, database, Discord SDK, native app, framework, or rem
 ## Verification expectations
 Automate:
 - storage and popup state;
+- schema migration, opaque channel keys, defaults, per-channel overrides, and override removal;
+- exact server-channel route recognition, SPA channel switching, and private-browsing fallback;
 - both manifest builds;
 - Firefox `web-ext lint`;
 - detector success, partial success, failure, and protected-node rejection;
@@ -108,6 +110,8 @@ Manually verify in Windows Firefox first, then Chrome:
 - only messages/thread content remains;
 - all persistent Discord chrome is hidden;
 - `Ctrl+K` and destination changes work;
+- channel overrides reapply when returning to a configured server channel;
+- unconfigured channels and DMs use defaults;
 - reading, scrolling, reactions, menus, dialogs, and threads work;
 - Focus-off restores composing, sending, replies, edits, and uploads;
 - Focus-off restores full Discord immediately;
