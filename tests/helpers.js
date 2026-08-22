@@ -54,7 +54,12 @@ function unsupportedFixture() {
   });
 }
 
-function createMemoryApi(initialSettings = { version: 1, focusEnabled: true }) {
+function createMemoryApi(initialSettings = {
+  version: 2,
+  focusEnabled: true,
+  hideNavigation: true,
+  hideMessageBox: true
+}) {
   const listeners = [];
   const store = {
     discordFocusSettings: initialSettings

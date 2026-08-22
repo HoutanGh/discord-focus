@@ -290,6 +290,24 @@ test("uses the composer as a chat anchor while hiding it", () => {
   assert.equal(messageList.getAttribute(layout.ATTR_PROTECTED), "true");
 });
 
+test("shows navigation and the composer independently while retaining Focus cleanup", () => {
+  const dom = discordFixture();
+  const result = layout.applyFocus(dom.window.document, {
+    hideNavigation: false,
+    hideComposer: false
+  });
+  const documentRef = dom.window.document;
+
+  assert.equal(result.supported, true);
+  assert.equal(result.status, "active");
+  assert.deepEqual(result.hiddenReasons, ["header", "memberPanel"]);
+  assert.equal(documentRef.querySelector(".guilds_a").hasAttribute(layout.ATTR_HIDDEN), false);
+  assert.equal(documentRef.querySelector(".sidebar_a").hasAttribute(layout.ATTR_HIDDEN), false);
+  assert.equal(documentRef.querySelector(".channelTextArea_a").hasAttribute(layout.ATTR_HIDDEN), false);
+  assert.equal(documentRef.querySelector("header").getAttribute(layout.ATTR_HIDDEN), "header");
+  assert.equal(documentRef.querySelector(".membersWrap_a").getAttribute(layout.ATTR_HIDDEN), "member-panel");
+});
+
 test("fails open on unsupported pages", () => {
   const dom = unsupportedFixture();
   const result = layout.applyFocus(dom.window.document);

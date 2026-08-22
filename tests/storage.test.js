@@ -8,8 +8,22 @@ test("defaults Focus mode to enabled", async () => {
   const settings = await storage.readSettings(api);
 
   assert.deepEqual(settings, {
+    version: 2,
+    focusEnabled: true,
+    hideNavigation: true,
+    hideMessageBox: true
+  });
+});
+
+test("migrates existing settings to hiding navigation and the message box", () => {
+  assert.deepEqual(storage.normalizeSettings({
     version: 1,
-    focusEnabled: true
+    focusEnabled: false
+  }), {
+    version: 2,
+    focusEnabled: false,
+    hideNavigation: true,
+    hideMessageBox: true
   });
 });
 
@@ -23,16 +37,48 @@ test("writes and reads Focus mode setting", async () => {
   assert.equal((await storage.readSettings(api)).focusEnabled, true);
 });
 
+test("writes navigation and message-box settings independently", async () => {
+  const api = createMemoryApi();
+
+  await storage.writeHideNavigation(false, api);
+  assert.deepEqual(await storage.readSettings(api), {
+    version: 2,
+    focusEnabled: true,
+    hideNavigation: false,
+    hideMessageBox: true
+  });
+
+  await storage.writeHideMessageBox(false, api);
+  assert.deepEqual(await storage.readSettings(api), {
+    version: 2,
+    focusEnabled: true,
+    hideNavigation: false,
+    hideMessageBox: false
+  });
+});
+
 test("normalizes storage change events", () => {
   const next = storage.settingsFromChange({
     discordFocusSettings: {
-      oldValue: { version: 1, focusEnabled: true },
-      newValue: { version: 1, focusEnabled: false }
+      oldValue: {
+        version: 2,
+        focusEnabled: true,
+        hideNavigation: true,
+        hideMessageBox: true
+      },
+      newValue: {
+        version: 2,
+        focusEnabled: false,
+        hideNavigation: false,
+        hideMessageBox: true
+      }
     }
   }, "local");
 
   assert.deepEqual(next, {
-    version: 1,
-    focusEnabled: false
+    version: 2,
+    focusEnabled: false,
+    hideNavigation: false,
+    hideMessageBox: true
   });
 });
