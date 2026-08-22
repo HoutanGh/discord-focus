@@ -34,7 +34,10 @@ Unchecking an option preserves that region while the remaining Focus cleanup sta
 ## Non-negotiables
 - Run only on `https://discord.com/channels/*`.
 - Never call Discord APIs, inspect WebSockets, access tokens/cookies/Discord storage, automate actions, scrape content, or inject into Discord's JavaScript runtime.
-- Never read, log, store, or transmit messages, names, channel/server titles, account identifiers, channel IDs, or URLs.
+- Never read, log, store, or transmit messages, names, channel/server titles, or account identifiers.
+- Use only the minimum route information required for local per-channel preferences: the content script may inspect the current `location.pathname` in memory and use only its channel segment to select an override.
+- Never log, persist, sync, expose to page content, or transmit a raw channel ID or URL. Before persistence, derive an opaque installation-specific key and discard the raw pathname and channel ID.
+- Store only the opaque channel key and the approved preference booleans in `storage.local`. Do not save per-channel preferences from private-browsing sessions.
 - Keep the extension local-only: no telemetry, remote code, CDN assets, external services, or extension-originated network requests.
 - Declare only permissions required by the product spec.
 - Fail open on unsupported or uncertain layouts.

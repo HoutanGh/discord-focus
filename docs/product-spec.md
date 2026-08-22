@@ -64,7 +64,10 @@ The extension must:
 - run only on `https://discord.com/channels/*`;
 - use extension-local storage only;
 - inspect structural DOM metadata in memory only;
-- never read, log, store, or transmit message text, names, channel/server titles, account identifiers, channel IDs, URLs, tokens, cookies, Discord storage, or WebSocket data;
+- never read, log, store, or transmit message text, names, channel/server titles, account identifiers, tokens, cookies, Discord storage, or WebSocket data;
+- use only the minimum route information required for local per-channel preferences: the content script may inspect the current `location.pathname` in memory and use only its channel segment to select an override;
+- never log, persist, sync, expose to page content, or transmit a raw channel ID or URL; derive an opaque installation-specific key before persistence, then discard the raw pathname and channel ID;
+- store only the opaque channel key and the approved preference booleans in `storage.local`, and do not save per-channel preferences from private-browsing sessions;
 - never call Discord APIs, automate account actions, or inject code into Discord's JavaScript runtime;
 - include no analytics, telemetry, remote code, CDN assets, external services, or extension-originated network requests;
 - request only the `storage` permission and the narrowly scoped static content-script match.
