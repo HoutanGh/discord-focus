@@ -19,6 +19,14 @@ test("build creates Firefox and Chrome manifests with expected permissions", asy
   assert.equal(firefoxManifest.browser_specific_settings.gecko.strict_min_version, "140.0");
   assert.deepEqual(firefoxManifest.browser_specific_settings.gecko.data_collection_permissions.required, ["none"]);
   assert.equal(chromeManifest.browser_specific_settings, undefined);
+  assert.deepEqual(firefoxManifest.content_scripts[0].js, [
+    "shared/extension-api.js",
+    "shared/storage.js",
+    "content/channel-context.js",
+    "content/layout-detector.js",
+    "content/content.js"
+  ]);
+  assert.deepEqual(chromeManifest.content_scripts[0].js, firefoxManifest.content_scripts[0].js);
   await stat(path.join(rootDir, "dist/firefox/manifest.json"));
   await stat(path.join(rootDir, "dist/chrome/manifest.json"));
 });

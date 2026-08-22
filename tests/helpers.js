@@ -1,6 +1,11 @@
 const { JSDOM } = require("jsdom");
 
-function discordFixture({ includeServerRail = true, includeSidebar = true, includeMemberPanel = true } = {}) {
+function discordFixture({
+  includeServerRail = true,
+  includeSidebar = true,
+  includeMemberPanel = true,
+  url = "https://discord.com/channels/1/2"
+} = {}) {
   return new JSDOM(`
     <!doctype html>
     <html>
@@ -33,7 +38,7 @@ function discordFixture({ includeServerRail = true, includeSidebar = true, inclu
       </body>
     </html>
   `, {
-    url: "https://discord.com/channels/1/2"
+    url
   });
 }
 
@@ -55,22 +60,35 @@ function unsupportedFixture() {
 }
 
 function createMemoryApi(initialSettings = {
-  version: 2,
+  version: 3,
   focusEnabled: true,
-  hideNavigation: true,
-  hideMessageBox: true
-}) {
+  defaults: {
+    hideNavigation: true,
+    hideMessageBox: true
+  },
+  channelOverrides: {}
+}, options = {}) {
   const listeners = [];
   const store = {
+    ...options.initialStore,
     discordFocusSettings: initialSettings
   };
   const api = {
     storage: {
       local: {
-        async get(key) {
-          return {
-            [key]: store[key]
-          };
+        async get(keys) {
+          if (keys === null || keys === undefined) {
+            return { ...store };
+          }
+          if (typeof keys === "string") {
+            return { [keys]: store[keys] };
+          }
+          if (Array.isArray(keys)) {
+            return Object.fromEntries(keys.map((key) => [key, store[key]]));
+          }
+          return Object.fromEntries(Object.entries(keys).map(([key, fallback]) => {
+            return [key, store[key] === undefined ? fallback : store[key]];
+          }));
         },
         async set(items) {
           const changes = {};
@@ -98,6 +116,9 @@ function createMemoryApi(initialSettings = {
         }
       }
     },
+    extension: {
+      inIncognitoContext: Boolean(options.inIncognitoContext)
+    },
     tabs: {
       async query() {
         return [{ id: 1 }];
@@ -105,7 +126,8 @@ function createMemoryApi(initialSettings = {
       async sendMessage(_tabId, message) {
         return api.runtime.messageListener(message);
       }
-    }
+    },
+    __store: store
   };
 
   return api;
