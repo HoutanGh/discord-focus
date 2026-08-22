@@ -6,6 +6,7 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const scannedRoots = ["src", "scripts", "tools"].map((name) => path.join(rootDir, name));
 const scannerFile = path.join(rootDir, "scripts/check-privacy.mjs");
 const allowedUrls = new Set(["https://discord.com/channels/*"]);
+const pathnameReaders = new Set(["src/content/content.js"]);
 const blockedPatterns = [
   /\bfetch\s*\(/i,
   /\bXMLHttpRequest\b/,
@@ -24,7 +25,16 @@ const blockedPatterns = [
   /\bdiscord\.com\/api\b/i,
   /\bapi\/v\d+\b/i,
   /\banalytics\b/i,
-  /\btelemetry\b/i
+  /\btelemetry\b/i,
+  /\bstorage\.sync\b/
+];
+const blockedProductionPatterns = [
+  /\bconsole\./,
+  /\blocation\.(?:hash|host|hostname|href|origin|search)\b/
+];
+const blockedContentPatterns = [
+  /\.(?:innerText|textContent)\b/,
+  /\bgetAttribute\s*\(\s*["'](?:alt|aria-label|title)["']/
 ];
 
 async function collectFiles(directory) {
@@ -59,6 +69,26 @@ async function scanFile(filePath) {
     if (pattern.test(source)) {
       failures.push(`${relativePath}: blocked source pattern ${pattern}`);
     }
+  }
+
+  if (relativePath.startsWith("src/")) {
+    for (const pattern of blockedProductionPatterns) {
+      if (pattern.test(source)) {
+        failures.push(`${relativePath}: blocked production pattern ${pattern}`);
+      }
+    }
+  }
+
+  if (relativePath.startsWith("src/content/")) {
+    for (const pattern of blockedContentPatterns) {
+      if (pattern.test(source)) {
+        failures.push(`${relativePath}: blocked Discord-content read pattern ${pattern}`);
+      }
+    }
+  }
+
+  if (/\blocation\.pathname\b/.test(source) && !pathnameReaders.has(relativePath)) {
+    failures.push(`${relativePath}: location.pathname is restricted to the content controller`);
   }
 
   failures.push(...checkUrls(relativePath, source));

@@ -14,6 +14,7 @@
       "js": [
         "shared/extension-api.js",
         "shared/storage.js",
+        "content/channel-context.js",
         "content/layout-detector.js",
         "content/content.js"
       ],

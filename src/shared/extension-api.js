@@ -80,6 +80,11 @@
           }
         }
       },
+      extension: {
+        inIncognitoContext: Boolean(
+          rawApi.extension && rawApi.extension.inIncognitoContext
+        )
+      },
       tabs: {
         query(queryInfo) {
           return apiCall(rawApi, rawApi.tabs, "query", [queryInfo]);

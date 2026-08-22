@@ -8,11 +8,21 @@
   </head>
   <body>
     <main>
-      <label class="toggle">
+      <label class="toggle master-toggle">
         <input id="focus-toggle" type="checkbox">
         <span>Focus mode</span>
       </label>
-      <div class="options">
+
+      <div class="scope-tabs" role="tablist" aria-label="Settings scope">
+        <button id="channel-scope" type="button" role="tab" aria-controls="preference-panel">
+          This channel
+        </button>
+        <button id="defaults-scope" type="button" role="tab" aria-controls="preference-panel">
+          Defaults
+        </button>
+      </div>
+
+      <section id="preference-panel" class="options" role="tabpanel">
         <label class="toggle">
           <input id="navigation-toggle" type="checkbox">
           <span>Hide navigation</span>
@@ -21,8 +31,16 @@
           <input id="message-box-toggle" type="checkbox">
           <span>Hide message box</span>
         </label>
-      </div>
-      <p id="status" aria-live="polite">Checking status...</p>
+        <div class="scope-actions">
+          <button id="use-defaults" class="action-button" type="button" hidden>Use defaults</button>
+          <button id="clear-channel-settings" class="action-button clear-button" type="button" hidden>
+            Clear all channel settings
+          </button>
+        </div>
+        <p id="scope-status" class="scope-status" aria-live="polite"></p>
+      </section>
+
+      <p id="status" class="page-status" aria-live="polite">Checking status...</p>
     </main>
     <script src="../shared/extension-api.js"></script>
     <script src="../shared/storage.js"></script>
