@@ -5,8 +5,10 @@
 
   const SETTINGS_KEY = "discordFocusSettings";
   const DEFAULT_SETTINGS = Object.freeze({
-    version: 1,
-    focusEnabled: true
+    version: 2,
+    focusEnabled: true,
+    hideNavigation: true,
+    hideMessageBox: true
   });
 
   function normalizeSettings(value) {
@@ -15,10 +17,16 @@
     }
 
     return {
-      version: 1,
+      version: 2,
       focusEnabled: typeof value.focusEnabled === "boolean"
         ? value.focusEnabled
-        : DEFAULT_SETTINGS.focusEnabled
+        : DEFAULT_SETTINGS.focusEnabled,
+      hideNavigation: typeof value.hideNavigation === "boolean"
+        ? value.hideNavigation
+        : DEFAULT_SETTINGS.hideNavigation,
+      hideMessageBox: typeof value.hideMessageBox === "boolean"
+        ? value.hideMessageBox
+        : DEFAULT_SETTINGS.hideMessageBox
     };
   }
 
@@ -43,6 +51,22 @@
     }, api);
   }
 
+  async function writeHideNavigation(hideNavigation, api = namespace.api) {
+    const current = await readSettings(api);
+    return writeSettings({
+      ...current,
+      hideNavigation: Boolean(hideNavigation)
+    }, api);
+  }
+
+  async function writeHideMessageBox(hideMessageBox, api = namespace.api) {
+    const current = await readSettings(api);
+    return writeSettings({
+      ...current,
+      hideMessageBox: Boolean(hideMessageBox)
+    }, api);
+  }
+
   function settingsFromChange(changes, areaName) {
     if (areaName !== "local" || !changes || !changes[SETTINGS_KEY]) {
       return null;
@@ -58,6 +82,8 @@
     readSettings,
     settingsFromChange,
     writeFocusEnabled,
+    writeHideMessageBox,
+    writeHideNavigation,
     writeSettings
   };
 

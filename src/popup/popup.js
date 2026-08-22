@@ -52,17 +52,31 @@
     storage = namespace.storage
   }) {
     const toggle = documentRef.querySelector("#focus-toggle");
+    const navigationToggle = documentRef.querySelector("#navigation-toggle");
+    const messageBoxToggle = documentRef.querySelector("#message-box-toggle");
     const status = documentRef.querySelector("#status");
 
     async function render() {
       const settings = await storage.readSettings(api);
       toggle.checked = settings.focusEnabled;
+      navigationToggle.checked = settings.hideNavigation;
+      messageBoxToggle.checked = settings.hideMessageBox;
       const pageStatus = await readPageStatus(api);
       status.textContent = statusText(pageStatus, settings);
     }
 
     toggle.addEventListener("change", async () => {
       await storage.writeFocusEnabled(toggle.checked, api);
+      await render();
+    });
+
+    navigationToggle.addEventListener("change", async () => {
+      await storage.writeHideNavigation(navigationToggle.checked, api);
+      await render();
+    });
+
+    messageBoxToggle.addEventListener("change", async () => {
+      await storage.writeHideMessageBox(messageBoxToggle.checked, api);
       await render();
     });
 

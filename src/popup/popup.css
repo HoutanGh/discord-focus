@@ -21,6 +21,17 @@ main {
   font-weight: 650;
 }
 
+.options {
+  border-block-start: 1px solid color-mix(in srgb, CanvasText 18%, Canvas);
+  display: grid;
+  gap: 10px;
+  padding-block-start: 12px;
+}
+
+.options .toggle {
+  font-weight: 500;
+}
+
 input {
   block-size: 18px;
   inline-size: 18px;

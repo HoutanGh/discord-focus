@@ -273,6 +273,16 @@
     }
   }
 
+  function shouldHideReason(reason, options) {
+    if (reason === "serverRail" || reason === "channelSidebar") {
+      return options.hideNavigation !== false;
+    }
+    if (reason === "composer") {
+      return options.hideComposer !== false;
+    }
+    return true;
+  }
+
   function detectLayout(documentRef) {
     const messageLists = findMessageLists(documentRef);
     const composers = findComposers(documentRef);
@@ -360,7 +370,7 @@
     });
   }
 
-  function applyFocus(documentRef) {
+  function applyFocus(documentRef, options = {}) {
     clearFocusMarkers(documentRef);
 
     const result = detectLayout(documentRef);
@@ -380,12 +390,22 @@
       node.setAttribute(ATTR_LAYOUT, "title-bar-grid");
     });
 
-    result.hiddenNodes.forEach((node, index) => {
-      node.setAttribute(ATTR_HIDDEN, markerValue(result.hiddenReasons[index]));
+    const hiddenEntries = result.hiddenNodes.map((node, index) => {
+      return [node, result.hiddenReasons[index]];
+    }).filter(([, reason]) => shouldHideReason(reason, options));
+    const hiddenNodes = hiddenEntries.map(([node]) => node);
+    const hiddenReasons = hiddenEntries.map(([, reason]) => reason);
+
+    hiddenEntries.forEach(([node, reason]) => {
+      node.setAttribute(ATTR_HIDDEN, markerValue(reason));
     });
 
     documentRef.documentElement.setAttribute(ATTR_ACTIVE, "true");
-    return result;
+    return {
+      ...result,
+      hiddenNodes,
+      hiddenReasons
+    };
   }
 
   const exported = {

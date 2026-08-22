@@ -19,12 +19,18 @@
     detector = namespace.layoutDetector,
     debounceMs = 80
   }) {
-    let focusEnabled = true;
+    let settings = {
+      focusEnabled: true,
+      hideNavigation: true,
+      hideMessageBox: true
+    };
     let observer = null;
     let debounceTimer = null;
     let started = false;
     let state = {
       focusEnabled: true,
+      hideNavigation: true,
+      hideMessageBox: true,
       active: false,
       status: "initializing",
       hiddenCount: 0,
@@ -42,6 +48,8 @@
     function getStatus() {
       return {
         focusEnabled: state.focusEnabled,
+        hideNavigation: state.hideNavigation,
+        hideMessageBox: state.hideMessageBox,
         active: state.active,
         status: state.status,
         statusLabel: visibleStatusLabel(state),
@@ -51,10 +59,10 @@
     }
 
     function applyCurrentState() {
-      if (!focusEnabled) {
+      if (!settings.focusEnabled) {
         detector.clearFocusMarkers(documentRef);
         return setState({
-          focusEnabled,
+          ...settings,
           active: false,
           status: "off",
           hiddenCount: 0,
@@ -62,9 +70,12 @@
         });
       }
 
-      const result = detector.applyFocus(documentRef);
+      const result = detector.applyFocus(documentRef, {
+        hideNavigation: settings.hideNavigation,
+        hideComposer: settings.hideMessageBox
+      });
       return setState({
-        focusEnabled,
+        ...settings,
         active: result.supported && result.hiddenNodes.length > 0,
         status: result.status,
         hiddenCount: result.hiddenNodes.length,
@@ -99,8 +110,7 @@
         return getStatus();
       }
 
-      const settings = await storage.readSettings(api);
-      focusEnabled = settings.focusEnabled;
+      settings = await storage.readSettings(api);
       applyCurrentState();
       observeDocument();
 
@@ -110,7 +120,7 @@
           return;
         }
 
-        focusEnabled = nextSettings.focusEnabled;
+        settings = nextSettings;
         scheduleApply(0);
       });
 
